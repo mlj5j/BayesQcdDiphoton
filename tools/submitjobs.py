@@ -118,21 +118,21 @@ Queue 1
 
 shtemplate = '''#!/bin/bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-export SCRAM_ARCH=slc6_amd64_gcc630
+export SCRAM_ARCH=slc7_amd64_gcc820
 echo $PWD
 ls
-scram project CMSSW_10_1_0
-cd CMSSW_10_1_0/src
+scram project CMSSW_10_2_21
+cd CMSSW_10_2_21/src
 eval `scramv1 runtime -sh`
 cd ${_CONDOR_SCRATCH_DIR}
 echo $PWD
-export x509userproxy=/uscms/home/sbein/x509up_u47534
+export x509userproxy=/uscms/home/mjoyce/x509up_u47534
 ls
 python ANALYZER --fnamekeyword FNAMEKEYWORD MOREARGS
 
 for f in *.root
 do 
-   xrdcp "$f" root://cmseos.fnal.gov//store/user/lpcsusyphotons/TreeMakerRandS_28July2020/
+   xrdcp -f "$f" root://cmseos.fnal.gov//store/user/lpcsusyphotons/TreeMakerRandS_BDT/
 done
 rm *.root
 '''

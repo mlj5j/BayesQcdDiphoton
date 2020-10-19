@@ -85,7 +85,6 @@ _min_dPhi_ = array('f',[0])
 _dPhi_GGHardMET_ = array('f',[0])
 if mvaversion==2:
     prefix = 'mva_'
-    reader.AddVariable(prefix+"Ngoodjets",_Ngoodjets_)      
     reader.AddVariable(prefix+"ST",_ST_)          
     reader.AddVariable(prefix+"Pt_jets",_Pt_jets_)
     reader.AddVariable(prefix+"dPhi_GG",_dPhi_GG_)
@@ -98,7 +97,6 @@ if mvaversion==2:
     reader.AddVariable(prefix+"dPhi_GGHardMET",_dPhi_GGHardMET_)
 else:
     prefix = ''
-    reader.AddVariable(prefix+"Ngoodjets",_Ngoodjets_)      
     reader.AddVariable(prefix+"ST",_ST_)          
     reader.AddVariable(prefix+"Pt_jets",_Pt_jets_)
     reader.AddVariable(prefix+"dPhi_GG",_dPhi_GG_)
@@ -110,7 +108,26 @@ else:
     reader.AddVariable(prefix+"min_dPhi",_min_dPhi_)
     reader.AddVariable(prefix+"dPhi_GGHardMET",_dPhi_GGHardMET_)        
 #reader.BookMVA("BDT", 'usefulthings/TMVAClassification_BDT.weights_MJMay2020.xml')
-reader.BookMVA("BDT", 'usefulthings/bdt_RandS_2016-17_HardMETPt90cut_nobarrelcut.xml')
+
+#--------------------Added by MJ---------------------------------------------------
+
+#---------Adding xsec for ZGGtonunuGG---------------------
+ZGGxsec = np.zeros(1, dtype=float)
+
+BDT_dict = {
+    'BDT_16' : 'dataset_bdt_2016',
+    'BDT_17' : 'dataset_bdt_2017',
+    'BDT_18' : 'dataset_bdt_2018',
+    'BDT_1617' : 'dataset_bdt_2016-17',
+    'BDT_1718' : 'dataset_bdt_2017-18',
+    'BDT_all' : 'dataset_bdt_Run2'
+    }
+
+for key in BDT_dict:
+    reader.BookMVA(key, "usefulthings/BDT_weights/{0}/weights/TMVAClassification_BDT.weights.xml".format(BDT_dict[key]))
+#-----------------------------------------------------------------------------------
+
+#reader.BookMVA("BDT", 'usefulthings/bdt_RandS_2016-17_HardMETPt90cut_nobarrelcut.xml')
 ###
 
 if bootstrap=='0': 
@@ -134,6 +151,7 @@ else:
 is2017 = False
 is2016 = False
 is2018 = False
+isZGG = False
 
 if 'Fast' in fnamekeyword: isfast = True
 else: isfast = False
@@ -147,6 +165,9 @@ if 'Run2017' in fnamekeyword or 'Fall17' in fnamekeyword:
 if 'Run2018' in fnamekeyword or 'Autumn18' in fnamekeyword: 
     BTAG_deepCSV = 0.4184#0.4941####
     is2018 = True
+if 'ZGG' in fnamekeyword:
+    isZGG = True
+    
 
 BTag_Cut = BTAG_deepCSV
 
@@ -165,11 +186,12 @@ ls -1 -d /eos/uscms//store/group/lpcsusyphotons/TreeMaker/2018/*/*/*.root >> use
 '''
 
 ra2bspace = '/eos/uscms//store/group/lpcsusyhad/SusyRA2Analysis2015/Run2ProductionV17/'
-fnamefilename = 'usefulthings/filelistDiphoton.txt'
+#fnamefilename = 'usefulthings/filelistDiphoton.txt'
 fnamefilename = 'usefulthings/filelistDiphotonBig.txt'
-if not 'DoubleEG' in fnamekeyword:
-    if 'Summer16v3.QCD_HT' in fnamekeyword or 'Summer16v3.WGJets_MonoPhoton' in fnamekeyword: #or 'Run20' in fnamekeyword
-        fnamefilename = 'usefulthings/filelistV17.txt'
+
+#if not 'DoubleEG' in fnamekeyword:
+#    if 'Summer16v3.QCD_HT' in fnamekeyword or 'Summer16v3.WGJets_MonoPhoton' in fnamekeyword: #or 'Run20' in fnamekeyword
+#        fnamefilename = 'usefulthings/filelistV17.txt'
 fnamefile = open(fnamefilename)
 lines = fnamefile.readlines()
 a = fnamekeyword.strip()
@@ -181,9 +203,9 @@ filelist = []
 for line in lines:
     if not shortfname in line: continue
     fname = line.strip()
-    if ('Summer16v3.QCD_HT' in fnamekeyword or 'Summer16v3.WGJets_MonoPhoton' in fnamekeyword): fname = ra2bspace+fname
+#    if ('Summer16v3.QCD_HT' in fnamekeyword or 'Summer16v3.WGJets_MonoPhoton' in fnamekeyword): fname = ra2bspace+fname
     fname = fname.replace('/eos/uscms/','root://cmsxrootd.fnal.gov//')
-    if 'WGJets' in fnamekeyword: fname = fname.replace('root://cmsxrootd.fnal.gov///store/group/lpcsusyhad','root://hepxrd01.colorado.edu:1094//store/user/aperloff')
+#    if 'WGJets' in fnamekeyword: fname = fname.replace('root://cmsxrootd.fnal.gov///store/group/lpcsusyhad','root://hepxrd01.colorado.edu:1094//store/user/aperloff')
     print 'adding', fname
     c.Add(fname)
     filelist.append(fname)
@@ -322,10 +344,29 @@ if mktree:
     tree_out.Branch('mva_min_dPhi', mva_min_dPhi, 'mva_min_dPhi/D')    
     mva_dPhi_GGHardMET = np.zeros(1, dtype=float)
     tree_out.Branch('mva_dPhi_GGHardMET', mva_dPhi_GGHardMET, 'mva_dPhi_GGHardMET/D') 
-    mva_BDT = np.zeros(1, dtype=float)
-    tree_out.Branch('mva_BDT', mva_BDT, 'mva_BDT/D')
+
+#----------------Added by MJ----------------------------------------------
+    BDT_16 = np.zeros(1,dtype=float)
+    BDT_17 = np.zeros(1,dtype=float)
+    BDT_1617 = np.zeros(1,dtype=float)
+    BDT_18 = np.zeros(1,dtype=float)
+    BDT_1718 = np.zeros(1,dtype=float)
+    BDT_all = np.zeros(1,dtype=float)
+#    EventWeight = np.zeros(1,dtype=float)
+
+    b_BDT_16 = tree_out.Branch('BDT_16', BDT_16, 'BDT_16/D')
+    b_BDT_17 = tree_out.Branch('BDT_17', BDT_17, 'BDT_17/D')
+    b_BDT_1617 = tree_out.Branch('BDT_1617', BDT_1617, 'BDT_1617/D')
+    b_BDT_18 = tree_out.Branch('BDT_18', BDT_18, 'BDT_18/D')
+    b_BDT_1718 = tree_out.Branch('BDT_1718', BDT_1718, 'BDT_1718/D')
+    b_BDT_all = tree_out.Branch('BDT_all', BDT_all, 'BDT_all/D')
+
+    if isZGG:
+        c.SetBranchAddress('CrossSection', ZGGxsec)
+#    b_EventWeight = tree.Branch('EventWeight', EventWeight, 'EventWeight/D')
 
 
+#------------------------------------------------------------------------------
 
 print 'n(entries) =', n2process
 
@@ -687,7 +728,14 @@ for ientry in range((extended-1)*n2process, extended*n2process):
             _ST_jets_[0] = mva_ST_jets[0]
             _min_dPhi_[0] = mva_min_dPhi[0]
             _dPhi_GGHardMET_[0] = mva_dPhi_GGHardMET[0]
-            mva_BDT[0] = reader.EvaluateMVA("BDT")
+
+            BDT_16[0] = reader.EvaluateMVA('BDT_16')
+            BDT_17[0] = reader.EvaluateMVA('BDT_17')
+            BDT_1617[0] = reader.EvaluateMVA('BDT_1617')
+            BDT_18[0] = reader.EvaluateMVA('BDT_18')
+            BDT_1718[0] = reader.EvaluateMVA('BDT_1718')
+            BDT_all[0] = reader.EvaluateMVA('BDT_all')
+            if isZGG: ZGGxsec[0] = 0.07477
             tree_out.Fill()            
             IsUniqueSeed[0] = 0            
 
@@ -767,8 +815,14 @@ for ientry in range((extended-1)*n2process, extended*n2process):
                     _ST_jets_[0] = mva_ST_jets[0]
                     _min_dPhi_[0] = mva_min_dPhi[0]
                     _dPhi_GGHardMET_[0] = mva_dPhi_GGHardMET[0]
-                    mva_BDT[0] = reader.EvaluateMVA("BDT")
-                    print 'got bdt', mva_BDT[0], mva_HardMET[0]
+                    BDT_16[0] = reader.EvaluateMVA('BDT_16')
+                    BDT_17[0] = reader.EvaluateMVA('BDT_17')
+                    BDT_1617[0] = reader.EvaluateMVA('BDT_1617')
+                    BDT_18[0] = reader.EvaluateMVA('BDT_18')
+                    BDT_1718[0] = reader.EvaluateMVA('BDT_1718')
+                    BDT_all[0] = reader.EvaluateMVA('BDT_all')
+                    if isZGG: ZGGxsec[0] = 0.07477
+                    print 'got bdt', BDT_all[0], mva_HardMET[0]
                     tree_out.Fill()
                     IsUniqueSeed[0] = 0
 
@@ -815,8 +869,13 @@ for ientry in range((extended-1)*n2process, extended*n2process):
                     _ST_jets_[0] = mva_ST_jets[0]
                     _min_dPhi_[0] = mva_min_dPhi[0]
                     _dPhi_GGHardMET_[0] = mva_dPhi_GGHardMET[0]
-                    mva_BDT[0] = reader.EvaluateMVA("BDT")
-                    print 'got bdt rands', mva_BDT[0], mva_HardMET[0]
+                    BDT_16[0] = reader.EvaluateMVA('BDT_16')
+                    BDT_17[0] = reader.EvaluateMVA('BDT_17')
+                    BDT_1617[0] = reader.EvaluateMVA('BDT_1617')
+                    BDT_18[0] = reader.EvaluateMVA('BDT_18')
+                    BDT_1718[0] = reader.EvaluateMVA('BDT_1718')
+                    BDT_all[0] = reader.EvaluateMVA('BDT_all')
+                    print 'got bdt rands', BDT_all[0], mva_HardMET[0]
                     tree_out.Fill()
 
 
