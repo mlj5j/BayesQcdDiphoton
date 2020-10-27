@@ -31,8 +31,8 @@
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Run2018C-17Sep2018-v1.EGamma  --smears 50
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Run2018D-22Jan2019-v2.EGamma  --smears 50
 
-python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Summer16v3Fast.SMS-T5Wg_Tune  --smears 5
-python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Summer16v3Fast.SMS-T6Wg_Tune  --smears 5
+#python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Summer16v3Fast.SMS-T5Wg_Tune  --smears 5
+#python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Summer16v3Fast.SMS-T6Wg_Tune  --smears 5
 
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Run2017B-31Mar2018-v1.SinglePho  --smears 50
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword  Run2017C-31Mar2018-v1.SinglePho  --smears 50
@@ -52,3 +52,5 @@ python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fname
 
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword Summer16v3.QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword Summer16v3.QCD_HT
+
+python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Summer16v3.ZGG
