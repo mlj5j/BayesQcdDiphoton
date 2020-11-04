@@ -31,7 +31,8 @@ skipFilesWithErrorFile = True
 cwd = os.getcwd()
 
 #fnamefilename = 'usefulthings/filelistDiphotonBig.txt'
-fnamefilename = 'usefulthings/filelistTreeMaker2016ZGG.txt'
+#fnamefilename = 'usefulthings/filelist_test.txt'
+fnamefilename = 'usefulthings/filelist_updatexsec.txt'
 fnamefile = open(fnamefilename)
 
 
@@ -47,7 +48,14 @@ if 'Fall17' in fnamekeyword:
 if 'Autumn18' in fnamekeyword:
         year = 2018
 
+if 'ZGG' in fnamekeyword:
+        sample = 'ZGGtonunuGG'
+if 'T6Wg' in fnamekeyword:
+        sample = 'signal'
 
+if ( not os.path.exists(os.path.expandvars("$X509_USER_PROXY")) ):
+    print "#### No GRID PROXY detected. Please do voms-proxy-init -voms cms before submitting Condor jobs ####.\nEXITING"
+    quit()
 
 
 def main():
@@ -55,6 +63,7 @@ def main():
     for fname_ in fnamelines:
         if not (fnamekeyword in fname_): continue
         fname = fname_.strip()
+        foutname = fname.split('/')[-1]
         job = analyzer.split('/')[-1].replace('.py','').replace('.jdl','')+'-'+fname.split('/')[-1].strip()
         #from utils import pause
         #pause()
@@ -70,7 +79,7 @@ def main():
                 print 'skipping you...', errfilename
                 continue
         newsh = open('jobs/'+job+'.sh','w')
-        newshstr = shtemplate.replace('ANALYZER',analyzer).replace('FNAMEKEYWORD',fname).replace('YEAR',str(year))
+        newshstr = shtemplate.replace('ANALYZER',analyzer).replace('FNAMEKEYWORD',fname).replace('YEAR',str(year)).replace('SAMPLE',sample).replace('FOUT',foutname)
         newsh.write(newshstr)
         newsh.close()
         if not os.path.exists('output/'+fnamekeyword.replace(' ','')): 
@@ -107,14 +116,14 @@ cd CMSSW_10_2_21/src
 eval `scramv1 runtime -sh`
 cd ${_CONDOR_SCRATCH_DIR}
 echo $PWD
-export x509userproxy=/uscms/home/mjoyce/x509up_u47534
+export x509userproxy=/uscms/home/mjoyce/x509up_u51387
 ls
-echo python ANALYZER root://cmseos.fnal.gov/FNAMEKEYWORD
-python ANALYZER root://cmseos.fnal.gov/FNAMEKEYWORD
+echo python ANALYZER FNAMEKEYWORD
+python ANALYZER FNAMEKEYWORD
 
 for f in *.root
 do 
-   xrdcp -f "$f" root://cmseos.fnal.gov//store/user/lpcsusyphotons/TreeMaker/YEAR/test
+   xrdcp -f "$f" root://cmseos.fnal.gov//store/user/lpcsusyphotons/TreeMaker/YEAR/SAMPLE/FOUT
 done
 rm *.root
 '''

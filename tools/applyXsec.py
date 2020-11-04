@@ -4,70 +4,67 @@ import sys
 import numpy as np
 
 fname = sys.argv[1]
+print 'Loading {0}'.format(fname)
+ch = TChain('TreeMaker2/PreSelection')
+if '/store/' in fname:
+    ch.Add('root://cmseos.fnal.gov/{0}'.format(fname))
 
-fin = TFile(fname,'update')
-
-#fnameout = 'copy_'+fname
-#fout = TFile(fnameout, 'recreate')
-
-#keys = fin.GetListOfKeys()
-#keys = sorted(keys, key=lambda thing: thing.GetName())
-#for key in keys:
-#    name = key.GetName()
-#    dodad = fin.Get(name)
-#    fout.cd()
-#    dodad.Write()
+#else:
+#    ch.Add(fname)
+print fname.split('/')[-1]
+fnameout = 'copy_{0}'.format(fname.split('/')[-1])
+#fnameout = 'copy_'+fname.strip('/')[-1]
+fout = TFile.Open(fnameout, 'recreate')
 
 
-tree = fin.Get("TreeMaker2/PreSelection")
-
-#fout.mkdir('TreeMaker2')
-#fout.cd('TreeMaker2')
-#treeout = tree.CloneTree(0)
+fout.mkdir('TreeMaker2')
+fout.cd('TreeMaker2')
+tree = ch.CloneTree(0)
 
 xsec = np.zeros(1, dtype=float)
 IsZGG = False
 IsT6 = False
 
-b = tree.GetBranch('CrossSection')
-
 if 'ZGG' in fname:
     print 'updating xsection for ZGG process!'
-    tree.SetBranchAddress('CrossSection', xsec)
+    ch.SetBranchAddress('CrossSection', xsec)
     IsZGG = True
 
 if 'T6Wg' in fname:
     print 'updating xsection for squark-antisquark production!'
-    tree.SetBranchAddress('CrossSection', xsec)
+    ch.SetBranchAddress('CrossSection', xsec)
     IsT6 = True
-    dict_xsec = mkXsec_dict('../usefulthings/xsec/json/pp13_squark_NNLO+NNLL.json')
+#    dict_xsec = mkXsec_dict('/usefulthings/xsec/json/pp13_squark_NNLO+NNLL.json')
+    dict_xsec = mkXsec_dict('usefulthings/pp13_squark_NNLO+NNLL.json')
     
 
 susymass = -99.9
-nentries = tree.GetEntries()
-print nentries
+nentries = ch.GetEntries()
+#nentries = 1000
+
 for jentry in range(0, nentries):
 
-    print 'Doing entry {0}'.format(jentry)
+    ientry = ch.LoadTree(jentry)
+    if ientry<0:
+        break
+    nb = ch.GetEntry(jentry)
+    if nb<=0:
+        continue
 
-    tree.GetEntry(jentry)
-
-    print 'Got the entry'
-    b.Reset()
     if IsZGG: xsec[0] = 0.07477
     
     
     if IsT6: 
-        for i, pdgid in enumerate(tree.GenParticles_PdgId):
-            if (abs(pdgid) > 1000001 and abs(pdgid) < 1000011) or (abs(pdgid) > 2000001 and abs(pdgid) < 2000011):
-                susymass = round(tree.GenParticles[i].M(),6)
+        for i, pdgid in enumerate(ch.GenParticles_PdgId):
+            if (abs(pdgid) > 1000000 and abs(pdgid) < 1000011) or (abs(pdgid) > 2000000 and abs(pdgid) < 2000011):
+                susymass = round(ch.GenParticles[i].M(),6)
                 xsec[0] = getXsec(dict_xsec, susymass)
                 continue
-
-    b.Fill()
+    tree.Fill()
+    #b.Fill()
 
 #tree.Write("", TFile.kOverwrite)
-fin.Write("", TFile.kOverwrite)
-fin.Close()
+fout.Write()
+fout.Close()
 print "complete!!"
 

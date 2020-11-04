@@ -53,4 +53,10 @@
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword Summer16v3.QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf
 #python tools/submitjobs.py --analyzer tools/MaximizePosteriorDiphoton.py --fnamekeyword Summer16v3.QCD_HT
 
-python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Summer16v3.ZGG
+#python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Summer16v3.ZGG
+#python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Fall17.ZGG
+#python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Autumn18.ZGG
+
+python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Summer16v3Fast.SMS-T6Wg
+#python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Fall17Fast.SMS-T6Wg_Tune
+#python tools/submitjobs2.py --analyzer tools/applyXsec.py --fnamekeyword Autumn18Fast.SMS-T6Wg_Tune

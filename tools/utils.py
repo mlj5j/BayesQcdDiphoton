@@ -1,5 +1,8 @@
 from ROOT import *
 from array import array
+import os, json, sys
+import pandas as pd
+
 
 tl = TLatex()
 tl.SetNDC()
@@ -1079,3 +1082,23 @@ def passesUniversalSelection(t, verbose=True):
 def passesHadronicSusySelection(t):
     if not (t.NElectrons==0 and t.NMuons==0 and t.isoElectronTracks==0 and t.isoMuonTracks==0 and t.isoPionTracks==0): return False
     return True
+
+def mkXsec_dict(xsecfile):
+#-------------load data from json file
+#xsecfile = sys.argv[1]
+    with open(xsecfile) as f:
+        data = json.load(f)
+    df = pd.DataFrame.from_dict(data["data"], orient = "index")
+    df["mass_GeV"] = df.index.astype(int)
+    df = df.sort_values("mass_GeV")
+        #df.reset_index(inplace = True, drop = True)
+    dict_xsec = {}
+
+    for idx, row in df.iterrows():
+#        print 'Mass is {0} and xsec is {1}'.format(row.mass_GeV, row.xsec_pb)
+        dict_xsec[row.mass_GeV] = row.xsec_pb
+
+    return dict_xsec
+
+def getXsec(xsec_dict, susymass):
+    return xsec_dict[susymass]
